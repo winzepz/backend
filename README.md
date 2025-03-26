@@ -177,16 +177,3 @@ Authorization: Bearer 309110e8ce3f5a13768c11f205d1fbfebca51c79c4cd1885b9e57db18b
   "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZTQzMjQ4M2M3MDgxNTdhNDQyMThhOCIsImVtYWlsIjoiZGFyd2luQGRhcndpbnAuY29tIiwiaWF0IjoxNzQzMDA4NTk4LCJleHAiOjE3NDMwMTIxOTh9.DcsFW-4CpOseguvsltW4PASo1rcuTzE8ep6M7Vkzmho"
 }
 ```
-
-### 3. Example of Error Response
-If validation fails, for example, if the bio is too short:
-```json
-{
-  "message": "Validation failed",
-  "errors": [
-    {
-      "field": "bio",
-      "message": "Bio must be at least 50 characters"
-    }
-  ]
-}
