@@ -16,4 +16,8 @@ router.post("/register/step3", registerStep3);
 // Login route
 router.post("/login", loginUser);
 
+router.get('/meowmeow', (req, res) => {
+    res.json({ message: 'Meow' });
+  });
+
 module.exports = router;

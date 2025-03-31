@@ -12,9 +12,29 @@ connectDB();
 const app = express();
 
 app.use(express.json());
-app.use(cors());
-app.use(session({ secret: process.env.JWT_SECRET, resave: false, saveUninitialized: true }));
 
+// Configure CORS
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Session Middleware
+app.use(
+  session({
+    secret: process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: false, // Set to false for better security
+    cookie: {
+      secure: process.env.NODE_ENV === "production", // Secure cookies in production
+      httpOnly: true, // Prevents XSS attacks
+      sameSite: "lax", // Adjust based on your needs
+    },
+  })
+);
+
+// Routes
 app.use("/api/auth", authRoutes);
 app.use(errorHandler);
 
