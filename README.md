@@ -1,179 +1,128 @@
-
-# API Documentation for User Registration and Login
+# User Registration and Login API Documentation
 
 ## Base URL
-The base URL for the API will be:
+The base URL for the API is:
 ```
 https://backend-i4mt.onrender.com/api
 ```
 
+---
+
 ## Authentication API
-This API allows users to register and log in to the system.
+This API handles user authentication, including a three-step registration process and login functionality.
 
-## 1. User Registration
+### 1. User Registration (Multi-Step Process)
+The registration process is divided into three steps. Data from each step is temporarily stored in the session until completion.
 
-### Endpoint
-```
-POST /auth/register
-```
+#### Step 1: Register with Name, Email, and Password
+- **Endpoint:** `POST /auth/register/step1`
+- **Description:** The first step of registration. Validates and stores user data in the session.
+- **Request Body:**
 
-### Description
-This endpoint registers a new user in the system. It requires the user to provide their full name, email, password, bio, preferences, experience level, terms agreement, and optionally subscribe to newsletter updates.
+| Field      | Type   | Required | Description |
+|------------|--------|----------|-------------|
+| fullName   | string | Yes      | Must be between 3 and 100 characters long. |
+| email      | string | Yes      | Must be a valid, unique email address. |
+| password   | string | Yes      | Must be at least 8 characters long and include at least one uppercase letter, one number, and one special character. |
 
-### Request Body
-The request body must be sent as JSON with the following fields:
-
-| Field            | Type    | Required | Description |
-|-----------------|---------|----------|-------------|
-| fullName        | string  | Yes      | The full name of the user (must be at least 3 characters long). |
-| email          | string  | Yes      | The user's email address (must be unique and valid). |
-| password       | string  | Yes      | The password for the user (must be at least 8 characters long, contain at least one uppercase letter, one number, and one special character). |
-| bio            | string  | Yes      | A short biography for the user (must be between 50 and 2000 characters). |
-| preferences    | array   | Yes      | A list of the user’s preferences (between 1 and 5 items). Example: `["Crime", "Local News"]`. |
-| experienceLevel | string  | Yes      | The user's experience level. Must be one of: `["beginner", "intermediate", "experienced"]`. |
-| termsAgreed    | boolean | Yes      | A boolean indicating whether the user agrees to the terms and conditions. Must be `true` for registration to succeed. |
-| newsletterUpdates | boolean | No | A boolean indicating whether the user wants to receive newsletter updates (default is `false`). |
-
-### Response
-A successful response will return a JWT token for authentication and a success message.
-
-#### Success Response:
-```json
-{"message":"User registered successfully",
-"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZTQzMTkxM2M3MDgxNTdhNDQyMThhNSIsImVtYWlsIjoidXNlckBkYXJnZ2d1dXV1NTU1dTY2ZmZmZ2d3aW4uY29tIiwiaWF0IjoxNzQzMDA4MTQ2LCJleHAiOjE3NDMwMTE3NDZ9.UjDzUqQYpT3G4mgqMwhmbR6rHkll5yVSpvC2rgqWswU"}
-```
-
-#### Error Response:
+- **Response:**
 ```json
 {
-  "message": "Validation failed",
-  "errors": [
-    {
-      "field": "email",
-      "message": "Please enter a valid email address"
-    },
-    {
-      "field": "password",
-      "message": "Password must contain at least one uppercase letter, one number, and one special character"
-    },
-    {
-      "field": "bio",
-      "message": "Bio must be at least 50 characters"
-    }
-  ]
+  "message": "Step 1 data stored in session"
 }
 ```
 
-## User Login
+---
 
-### Endpoint
-```
-POST /auth/login
-```
+#### Step 2: Register with Bio and Portfolio URL
+- **Endpoint:** `POST /auth/register/step2`
+- **Description:** The second step of registration. Validates and stores user bio and portfolio information.
+- **Request Body:**
 
-### Description
-This endpoint is used by users to log in to the system. After a successful login, the user will receive a JWT token for future authentication.
+| Field           | Type    | Required | Description |
+|----------------|---------|----------|-------------|
+| bio           | string  | Yes      | Must be between 50 and 2000 characters. |
+| portfolioURL  | string  | No       | Must be a valid URL (e.g., `facebook.com`). |
+| newsletterUpdates | boolean | No | Defaults to `false`. |
 
-### Request Body
-The request body must be sent as JSON with the following fields:
-
-| Field    | Type   | Required | Description |
-|----------|--------|----------|-------------|
-| email    | string | Yes      | The email address associated with the user’s account. |
-| password | string | Yes      | The user’s password for authentication. |
-
-### Response
-A successful response will return a JWT token for authentication.
-
-#### Success Response:
+- **Response:**
 ```json
 {
-  "message": "Login successful",
-  "token": "your_jwt_token_here"
+  "message": "Step 2 data stored in session"
 }
 ```
 
-#### Error Response:
-```json
-{
-  "message": "Invalid credentials"
-}
-```
+---
 
-## Error Handling and Validation
+#### Step 3: Register with Preferences, Experience Level, and Terms Agreement
+- **Endpoint:** `POST /auth/register/step3`
+- **Description:** The final step of registration. Completes user creation and stores data in the database.
+- **Request Body:**
 
-Common Error Responses:
-- **400 Bad Request**: Invalid or missing parameters.
-- **401 Unauthorized**: When the user is not authorized (wrong credentials or token expired).
-- **500 Internal Server Error**: If an unexpected error occurs on the server.
+| Field            | Type   | Required | Description |
+|-----------------|--------|----------|-------------|
+| preferences     | array  | Yes      | User-selected preferences (1 to 5 options). |
+| experienceLevel | string | Yes      | Must be `beginner`, `intermediate`, or `experienced`. |
+| termsAgreed     | boolean | Yes     | Must be `true` (user must agree to terms). |
 
-#### Validation Error Example:
-```json
-{
-  "message": "Validation failed",
-  "errors": [
-    {
-      "field": "bio",
-      "message": "Bio must be at least 50 characters"
-    }
-  ]
-}
-```
-
-## JWT Authentication
-
-- **Authorization**: For routes that require authentication, include the JWT token in the Authorization header as a Bearer token.
-
-#### Example:
-```
-Authorization: Bearer 309110e8ce3f5a13768c11f205d1fbfebca51c79c4cd1885b9e57db18bf01714
-
-```
-
-- **Token Expiration**: The JWT token expires in 1 hour. After that, the user must log in again to get a new token.
-
-## Testing the API with Postman
-
-### 1. Registering a User
-- **URL**: `POST https://backend-i4mt.onrender.com/api/auth/register`
-- **Headers**: `Content-Type: application/json`
-- **Body (JSON)**:
-```json
-{
-  "fullName": "Darwin Paudel",
-  "email": "darwin@darwinp.com",
-  "password": "StrongPass123!",
-  "bio": "This is a user bio with more than 50 characters to meet validation rules.",
-  "preferences": ["Crime", "Local News"],
-  "experienceLevel": "beginner",
-  "termsAgreed": true,
-  "newsletterUpdates": true
-}
-```
-
-#### Expected Response:
+- **Response:**
 ```json
 {
   "message": "User registered successfully",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZTQzMjQ4M2M3MDgxNTdhNDQyMThhOCIsImVtYWlsIjoiZGFyd2luQGRhcndpbnAuY29tIiwiaWF0IjoxNzQzMDA4MzI5LCJleHAiOjE3NDMwMTE5Mjl9.zvWJMvo7p9dPNG6Y_FH2NmS06GQMK-p6fefT-QqsIv8"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZWE2MWNlZTFhOTUxNjUzNmI1OWMyNCIsImVtYWlsIjoid3d3aW4ucGF1ZGRlbEBleGFtcGxlLmNvbSIsImlhdCI6MTc0MzQxMzcyNywiZXhwIjoxNzQzNDE3MzI3fQ._ecr-FsRFHmd2PG19ZWS18xJBsausjeZ8a3D"
 }
 ```
 
-### 2. Logging in a User
-- **URL**: `POST https://backend-i4mt.onrender.com/api/auth/login`
-- **Headers**: `Content-Type: application/json`
-- **Body (JSON)**:
+---
+
+### 2. User Login
+- **Endpoint:** `POST /auth/login`
+- **Description:** Authenticates a user with email and password.
+- **Request Body:**
+
+| Field   | Type   | Required | Description |
+|---------|--------|----------|-------------|
+| email   | string | Yes      | User's registered email. |
+| password| string | Yes      | User's password. |
+
+- **Response:**
 ```json
 {
-  "email": "darwin@darwinp.com",
-  "password": "StrongPass123!"
+    "message": "Login successful",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZWE2MWNlZTFhOTUxNjUzNmI1OWMyNCIsImVtYWlsIjoid3d3aW4ucGF1ZGRlbEBleGFtcGxlLmNvbSIsImlhdCI6MTc0MzQxMzcyNywiZXhwIjoxNzQzNDE3MzI3fQ._ecr-FsRFHmd2PG19ZWS18xJBsausjeZ8a3DwYH5SnE"
 }
 ```
 
-#### Expected Response:
-```json
-{
-  "message": "Login successful",
-  "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZTQzMjQ4M2M3MDgxNTdhNDQyMThhOCIsImVtYWlsIjoiZGFyd2luQGRhcndpbnAuY29tIiwiaWF0IjoxNzQzMDA4NTk4LCJleHAiOjE3NDMwMTIxOTh9.DcsFW-4CpOseguvsltW4PASo1rcuTzE8ep6M7Vkzmho"
-}
+## Error Handling
+All API responses return proper HTTP status codes. Errors are handled using the `errorHandler` middleware, returning structured error messages.
+
+---
+
+## Technologies Used
+- **Node.js** with **Express.js** for backend API.
+- **MongoDB** with **Mongoose** for database management.
+- **JWT** for authentication.
+- **Joi** for validation.
+- **Session storage** for temporary data storage during registration.
+- **Bcrypt.js** for password hashing.
+- **dotenv** for environment variables.
+
+---
+
+## How to Run Locally
+1. Clone the repository and install dependencies:
+```sh
+npm install
 ```
+2. Set up `.env` file with required values.
+3. Start the server:
+```sh
+npm start
+```
+4. API will be available at `http://localhost:5000/api`
+
+---
+
+This API ensures a secure and structured multi-step registration process with session handling and data validation.
+
+
