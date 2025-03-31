@@ -134,6 +134,7 @@ const registerStep3 = async (req, res, next) => {
       preferences,
       experienceLevel,
       termsAgreed,
+      role: "author"
     });
 
     await user.save();
