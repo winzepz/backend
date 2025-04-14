@@ -4,7 +4,7 @@ const Joi = require("joi");
 
 // Step 1: Register - Validate name, email, and password
 const step1ValidationSchema = Joi.object({
-  fullName: Joi.string().min(3).max(100).required().messages({
+  fullname: Joi.string().min(3).max(100).required().messages({
     'string.min': 'Full name must be at least 3 characters long',
     'string.max': 'Full name can be a maximum of 100 characters',
     'any.required': 'Full name is required',
@@ -13,12 +13,14 @@ const step1ValidationSchema = Joi.object({
     'string.email': 'Please enter a valid email address',
     'any.required': 'Email is required',
   }),
-  password: Joi.string().min(8).regex(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/).required().messages({
+  // .regex(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+  password: Joi.string().min(8).regex(/^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z\d@$!%*?&#^_+={}[\]:;"'<>,.?\/\\|-]{8,}$/).required().messages({
     'string.min': 'Password must be at least 8 characters long',
     'string.pattern.base': 'Password must contain at least one uppercase letter, one number, and one special character',
     'any.required': 'Password is required',
   }),
 });
+
 
 // Step 2: Register - Validate bio, portfolioURL (optional), newsletterUpdates
 const step2ValidationSchema = Joi.object({
@@ -65,7 +67,7 @@ const registerStep1 = async (req, res, next) => {
   if (error) {
     return res.status(400).json({
       message: "Validation failed",
-      errors: error.details,
+      errors: error.details.map(err => err.message),
     });
   }
   const { email } = req.body;

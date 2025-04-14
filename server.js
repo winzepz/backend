@@ -10,15 +10,13 @@ dotenv.config();
 connectDB();
 
 const app = express();
-
-app.use(express.json());
-
 // Configure CORS
 app.use(cors({
   origin: 'http://localhost:5173',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  credentials: true, 
 }));
+
+
 
 // Session Middleware
 app.use(
@@ -33,6 +31,7 @@ app.use(
     },
   })
 );
+app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRoutes);

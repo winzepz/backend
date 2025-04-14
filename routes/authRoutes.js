@@ -26,7 +26,7 @@ router.get("/session", (req, res) => {
       step3Data: req.session.step3Data,
     });
   } else {
-    return res.status(404).json({ message: "Session data not found" }); // Session data not found
+    return res.status(200).json({ message: "Session data not found" }); // Session data not found
   }
 });
 
