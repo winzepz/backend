@@ -2,7 +2,7 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 
-// Step 1: Register - Validate name, email, and password
+// Step 1 Validation
 const step1ValidationSchema = Joi.object({
   fullname: Joi.string().min(3).max(100).required().messages({
     'string.min': 'Full name must be at least 3 characters long',
@@ -13,16 +13,18 @@ const step1ValidationSchema = Joi.object({
     'string.email': 'Please enter a valid email address',
     'any.required': 'Email is required',
   }),
-  // .regex(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
-  password: Joi.string().min(8).regex(/^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z\d@$!%*?&#^_+={}[\]:;"'<>,.?\/\\|-]{8,}$/).required().messages({
-    'string.min': 'Password must be at least 8 characters long',
-    'string.pattern.base': 'Password must contain at least one uppercase letter, one number, and one special character',
-    'any.required': 'Password is required',
-  }),
+  password: Joi.string()
+    .min(8)
+    .regex(/^(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9])/)
+    .required()
+    .messages({
+      'string.min': 'Password must be at least 8 characters long',
+      'string.pattern.base': 'Password must contain at least one lowercase letter, one number, and one special character',
+      'any.required': 'Password is required',
+    }),
 });
 
-
-// Step 2: Register - Validate bio, portfolioURL (optional), newsletterUpdates
+// Step 2 Validation
 const step2ValidationSchema = Joi.object({
   bio: Joi.string().min(50).max(2000).required().messages({
     'string.min': 'Bio must be at least 50 characters long',
@@ -30,8 +32,8 @@ const step2ValidationSchema = Joi.object({
     'any.required': 'Bio is required',
   }),
   portfolioURL: Joi.string()
-    .uri({ allowRelative: true }) // Allow relative URLs (e.g., facebook.com)
-    .pattern(/^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,6}(\/[^\s]*)?$/) // Custom regex to allow formats like facebook.com
+    .uri({ allowRelative: true })
+    .pattern(/^([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,6}(\/[^\s]*)?$/)
     .optional()
     .messages({
       'string.uri': 'Portfolio URL must be a valid URL or domain name (e.g., facebook.com)',
@@ -42,9 +44,7 @@ const step2ValidationSchema = Joi.object({
   }),
 });
 
-
-
-// Step 3: Register - Validate preferences, experienceLevel, termsAgreed
+// Step 3 Validation
 const step3ValidationSchema = Joi.object({
   preferences: Joi.array().items(Joi.string()).min(1).max(5).required().messages({
     'array.min': 'Please select between 1 and 5 preferences',
@@ -61,8 +61,8 @@ const step3ValidationSchema = Joi.object({
   }),
 });
 
-// Step 1 Register endpoint
-const registerStep1 = async (req, res, next) => {
+// Step 1 Handler
+const registerStep1 = async (req, res) => {
   const { error } = step1ValidationSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
@@ -70,26 +70,19 @@ const registerStep1 = async (req, res, next) => {
       errors: error.details.map(err => err.message),
     });
   }
-  const { email } = req.body;
 
-  // Check if the email already exists
+  const { email } = req.body;
   const userExists = await User.findOne({ email });
   if (userExists) {
-    return res.status(400).json({
-      message: "User already exists with this email",
-    });
+    return res.status(400).json({ message: "User already exists with this email" });
   }
 
-
-  // Store step 1 data in session
   req.session.step1Data = req.body;
-  res.status(200).json({
-    message: "Step 1 data stored in session",
-  });
+  res.status(200).json({ message: "Step 1 data stored in session" });
 };
 
-// Step 2 Register endpoint
-const registerStep2 = async (req, res, next) => {
+// Step 2 Handler
+const registerStep2 = async (req, res) => {
   const { error } = step2ValidationSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
@@ -97,17 +90,13 @@ const registerStep2 = async (req, res, next) => {
       errors: error.details,
     });
   }
-  
 
-  // Store step 2 data in session
   req.session.step2Data = req.body;
-  res.status(200).json({
-    message: "Step 2 data stored in session",
-  });
+  res.status(200).json({ message: "Step 2 data stored in session" });
 };
 
-// Step 3 Register endpoint
-const registerStep3 = async (req, res, next) => {
+// Step 3 Handler
+const registerStep3 = async (req, res) => {
   const { error } = step3ValidationSchema.validate(req.body);
   if (error) {
     return res.status(400).json({
@@ -116,52 +105,59 @@ const registerStep3 = async (req, res, next) => {
     });
   }
 
-  // All steps are valid, now proceed with final registration
-  const { step1Data, step2Data } = req.session;
-  const { preferences, experienceLevel, termsAgreed, } = req.body;
+  req.session.step3Data = req.body;
+
+  // All steps completed, send confirmation
+  res.status(200).json({ message: "Step 3 data stored. Ready to register the user." });
+};
+
+// Final Registration - Create User and Clear Session
+const finalizeRegistration = async (req, res) => {
+  const { step1Data, step2Data, step3Data } = req.session;
+
+  if (!step1Data || !step2Data || !step3Data) {
+    return res.status(400).json({ message: "Incomplete registration steps" });
+  }
 
   try {
+    // Check if the user already exists
     const userExists = await User.findOne({ email: step1Data.email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Create the user
     const user = new User({
-      fullName: step1Data.fullName,
+      fullName: step1Data.fullname,
       email: step1Data.email,
-      password: step1Data.password,
+      password: step1Data.password, // You should hash this password before saving (consider using bcrypt)
       bio: step2Data.bio,
       portfolioURL: step2Data.portfolioURL,
       newsletterUpdates: step2Data.newsletterUpdates,
-      preferences,
-      experienceLevel,
-      termsAgreed,
-      role: "author"
+      preferences: step3Data.preferences,
+      experienceLevel: step3Data.experienceLevel,
+      termsAgreed: step3Data.termsAgreed,
+      role: "author", // You can change role as needed
     });
 
     await user.save();
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // Clear session data after successful registration
+    // Clear session after final registration
     req.session.destroy();
-
-    res.status(201).json({
-      message: "User registered successfully",
-      token,
-    });
+    res.status(201).json({ message: "User registered successfully", token });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error registering user", error });
   }
 };
 
-// Login endpoint (to test after registration)
+// Login Handler
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -171,12 +167,11 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await user.matchPassword(password); // You should implement matchPassword using bcrypt
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT token
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,
@@ -193,9 +188,23 @@ const loginUser = async (req, res) => {
   }
 };
 
+// Session Destroy Handler
+const destroyRegistrationSession = (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      console.error("Failed to destroy session:", err);
+      return res.status(500).json({ message: "Failed to clear session" });
+    }
+    res.clearCookie("connect.sid");
+    res.status(200).json({ message: "Registration session cleared" });
+  });
+};
+
 module.exports = {
   registerStep1,
   registerStep2,
   registerStep3,
+  finalizeRegistration, // Added the final step
   loginUser,
+  destroyRegistrationSession,
 };
