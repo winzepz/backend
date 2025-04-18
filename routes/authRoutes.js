@@ -1,10 +1,13 @@
 const express = require("express");
+const { protect } = require('../middlewares/authMiddleware');
 const {
   registerStep1,
   registerStep2,
   registerStep3,
   finalizeRegistration,
   loginUser,
+  getUserProfile,
+  updateUserProfile,
   destroyRegistrationSession,
 } = require("../controllers/authController");
 
@@ -15,6 +18,7 @@ router.post("/register/step2", registerStep2);
 router.post("/register/step3", registerStep3);
 router.post("/register/finalize", finalizeRegistration); 
 router.post("/login", loginUser);
+
 
 // Destroy session route
 router.get("/register/destroy-session", destroyRegistrationSession);
@@ -31,6 +35,13 @@ router.get("/session", (req, res) => {
   } else {
     return res.status(200).json({ message: "Session data not found" });
   }
+});
+
+router.get('/profile', protect, getUserProfile); 
+router.put('/profile', protect, updateUserProfile);
+
+router.post('/logout', protect, (req, res) => {
+  res.json({ message: 'Logged out successfully' });
 });
 
 // Just a test route

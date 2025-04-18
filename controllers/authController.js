@@ -1,6 +1,7 @@
-const User = require("../models/User");
-const jwt = require("jsonwebtoken");
-const Joi = require("joi");
+const User = require('../models/User'); 
+const jwt = require('jsonwebtoken');
+const Joi = require('joi');
+const asyncHandler = require('express-async-handler');
 
 // Step 1 Validation
 const step1ValidationSchema = Joi.object({
@@ -130,14 +131,14 @@ const finalizeRegistration = async (req, res) => {
     const user = new User({
       fullName: step1Data.fullname,
       email: step1Data.email,
-      password: step1Data.password, // You should hash this password before saving (consider using bcrypt)
+      password: step1Data.password, 
       bio: step2Data.bio,
       portfolioURL: step2Data.portfolioURL,
       newsletterUpdates: step2Data.newsletterUpdates,
       preferences: step3Data.preferences,
       experienceLevel: step3Data.experienceLevel,
       termsAgreed: step3Data.termsAgreed,
-      role: "author", // You can change role as needed
+      role: "author", 
     });
 
     await user.save();
@@ -167,7 +168,7 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await user.matchPassword(password); // You should implement matchPassword using bcrypt
+    const isMatch = await user.matchPassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -200,11 +201,63 @@ const destroyRegistrationSession = (req, res) => {
   });
 };
 
+// Get user profile
+const getUserProfile = asyncHandler(async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id); // req.user.id is populated from the JWT token
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const userProfile = {
+      fullName: user.fullName,
+      email: user.email,
+      bio: user.bio,
+      portfolioURL: user.portfolioURL,
+      preferences: user.preferences,
+      experienceLevel: user.experienceLevel,
+    };
+
+    res.status(200).json({ message: "User profile fetched successfully", profile: userProfile });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching user profile", error });
+  }
+});
+
+// Update user profile
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const { fullName, bio, portfolioURL, preferences, experienceLevel } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id); // req.user.id comes from the JWT token
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update only the fields that are allowed
+    if (fullName) user.fullName = fullName;
+    if (bio) user.bio = bio;
+    if (portfolioURL) user.portfolioURL = portfolioURL;
+    if (preferences) user.preferences = preferences;
+    if (experienceLevel) user.experienceLevel = experienceLevel;
+
+    await user.save();  // Save the updated user
+
+    res.status(200).json({ message: "User profile updated successfully", profile: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating user profile", error });
+  }
+});
+
 module.exports = {
   registerStep1,
   registerStep2,
   registerStep3,
-  finalizeRegistration, // Added the final step
+  finalizeRegistration, 
   loginUser,
   destroyRegistrationSession,
+  getUserProfile,
+  updateUserProfile
 };
