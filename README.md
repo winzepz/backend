@@ -108,6 +108,34 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 - **dotenv** for environment variables.
 
 ---
+## 📬 API Endpoints
+
+### 🔐 Auth Routes (`/api/auth`)
+
+| Method | Endpoint                    | Description                       | Access    |
+|--------|-----------------------------|-----------------------------------|-----------|
+| POST   | `/register/step1`           | Start registration (email)        | Public    |
+| POST   | `/register/step2`           | Add bio and newsletter opt-in     | Public    |
+| POST   | `/register/step3`           | Add preferences, experience       | Public    |
+| POST   | `/register/finalize`        | Final step - save user            | Public    |
+| POST   | `/login`                    | Login with email + password       | Public    |
+| GET    | `/profile`                  | Get logged-in user's profile      | Protected |
+| PUT    | `/profile`                  | Update profile                    | Protected |
+| GET    | `/register/destroy-session` | Destroy incomplete reg. data      | Public    |
+| GET    | `/session`                  | Check ongoing reg. session        | Public    |
+
+---
+
+### 📰 News Routes (`/api/news`)
+
+| Method | Endpoint   | Description                        | Access |
+|--------|------------|------------------------------------|--------|
+| POST   | `/`        | Upload a news article (image/file) | Author |
+| GET    | `/author`  | Get current author's news          | Author |
+| GET    | `/:id`     | Get single news by ID              | Public |
+
+> 📌 **Upload fields must include:** `imageFile`, `contentFile`
+
 
 ## How to Run Locally
 1. Clone the repository and install dependencies:
