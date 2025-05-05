@@ -131,8 +131,8 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 | Method | Endpoint   | Description                        | Access |
 |--------|------------|------------------------------------|--------|
 | POST   | `/`        | Upload a news article (image/file) | Author |
-| GET    | `/author`  | Get current author's news          | Author |
-| GET    | `/:id`     | Get single news by ID              | Public |
+| GET    | `/author`  | Get current author's news(Bug      | Author |
+| GET    | `/:id`     | Get single news by ID(Bug)         | Public |
 
 > 📌 **Upload fields must include:** `imageFile`, `contentFile`
 
