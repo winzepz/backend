@@ -1,6 +1,6 @@
-// controllers/newsController.js
-const News = require("../models/news");
+const News = require("../models/News");
 const User = require("../models/User");
+const generateUniqueNewsId = require('../utils/generateUniqueNewsId');
 
 // CREATE NEWS
 exports.createNews = async (req, res) => {
@@ -20,7 +20,10 @@ exports.createNews = async (req, res) => {
     const pdfUrl = contentFile[0].path;   // Cloudinary url 
     const imageUrl = imageFile[0].path;   // Cloudinary url
 
+    const newsId = await generateUniqueNewsId();
+
     const news = new News({
+      newsId,
       title,
       tags,
       image: imageUrl,
@@ -43,10 +46,11 @@ exports.createNews = async (req, res) => {
   }
 };
 
-// GET NEWS BY AUTHOR
+// GET NEWS BY AUTHOR (Logged-in user's news)
 exports.getAuthorNews = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user._id || req.user.id;
+
     const newsList = await News.find({ authorId: userId });
 
     if (newsList.length === 0) {
@@ -60,10 +64,34 @@ exports.getAuthorNews = async (req, res) => {
   }
 };
 
+
+// GET PUBLIC NEWS BY AUTHOR ID (Only Published)
+exports.getNewsByAuthorId = async (req, res) => {
+  try {
+    const authorId = req.params.authorId;
+
+    const newsList = await News.find({
+      authorId,
+      status: "published", 
+      isDraft: false        
+    });
+
+    if (newsList.length === 0) {
+      return res.status(404).json({ message: "No published news found for this author." });
+    }
+
+    res.status(200).json(newsList);
+  } catch (err) {
+    console.error("Error fetching public news by author ID:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+
 // GET NEWS BY ID
 exports.getNewsById = async (req, res) => {
   try {
-    const news = await News.findById(req.params.id);
+    const news = await News.findOne({ newsId: req.params.id });  // Use newsId instead of MongoDB's ObjectId
 
     if (!news) {
       return res.status(404).json({ message: "News not found." });
@@ -75,3 +103,28 @@ exports.getNewsById = async (req, res) => {
     res.status(500).json({ error: "Internal server error." });
   }
 };
+
+// GET PUBLIC NEWS BY TAG
+exports.getNewsByTags = async (req, res) => {
+  try {
+    const tag = req.params.tag;
+
+    const newsList = await News.find({
+      tags: { $in: [tag] },        
+      status: "published",
+      isDraft: false
+    });
+
+    if (newsList.length === 0) {
+      return res.status(404).json({ message: "No news found with this tag." });
+    }
+
+    res.status(200).json(newsList);
+  } catch (err) {
+    console.error("Error fetching news by tag:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+
+

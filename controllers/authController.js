@@ -213,6 +213,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
     }
 
     const userProfile = {
+      UserId: user.userId,
       fullName: user.fullName,
       email: user.email,
       bio: user.bio,

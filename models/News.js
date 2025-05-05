@@ -2,6 +2,7 @@
 const mongoose = require("mongoose");
 
 const newsSchema = new mongoose.Schema({
+  newsId: {type: String, required: true, unique: true },
   title: { type: String, required: true },
   tags: [{ type: String }],
   image: { type: String, required: true },   
