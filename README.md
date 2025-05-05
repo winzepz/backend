@@ -108,33 +108,48 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 - **dotenv** for environment variables.
 
 ---
-## 📬 API Endpoints
+# 📬 API Documentation
 
-### 🔐 Auth Routes (`/api/auth`)
+## 🔐 Auth Routes (`/api/auth`)
 
-| Method | Endpoint                    | Description                       | Access    |
-|--------|-----------------------------|-----------------------------------|-----------|
-| POST   | `/register/step1`           | Start registration (email)        | Public    |
-| POST   | `/register/step2`           | Add bio and newsletter opt-in     | Public    |
-| POST   | `/register/step3`           | Add preferences, experience       | Public    |
-| POST   | `/register/finalize`        | Final step - save user            | Public    |
-| POST   | `/login`                    | Login with email + password       | Public    |
-| GET    | `/profile`                  | Get logged-in user's profile      | Protected |
-| PUT    | `/profile`                  | Update profile                    | Protected |
-| GET    | `/register/destroy-session` | Destroy incomplete reg. data      | Public    |
-| GET    | `/session`                  | Check ongoing reg. session        | Public    |
+| Method | Endpoint                    | Description                             | Access    |
+|--------|-----------------------------|-----------------------------------------|-----------|
+| POST   | `/register/step1`           | Start registration (email, password)    | Public    |
+| POST   | `/register/step2`           | Add bio and newsletter opt-in           | Public    |
+| POST   | `/register/step3`           | Add preferences and experience level    | Public    |
+| POST   | `/register/finalize`        | Final step - save user                  | Public    |
+| POST   | `/login`                    | Login with email + password             | Public    |
+| GET    | `/profile`                  | Get logged-in user's profile            | Protected |
+| PUT    | `/profile`                  | Update logged-in user's profile         | Protected |
+| GET    | `/register/destroy-session` | Destroy incomplete registration session | Public    |
+| GET    | `/session`                  | Check ongoing registration session      | Public    |
 
 ---
 
-### 📰 News Routes (`/api/news`)
+## 📰 News Routes (`/api/news`)
 
-| Method | Endpoint   | Description                        | Access |
-|--------|------------|------------------------------------|--------|
-| POST   | `/`        | Upload a news article (image/file) | Author |
-| GET    | `/author`  | Get current author's news(Bug      | Author |
-| GET    | `/:id`     | Get single news by ID(Bug)         | Public |
+| Method | Endpoint              | Description                                          | Access  |
+|--------|-----------------------|------------------------------------------------------|---------|
+| POST   | `/`                   | Upload a news article (image + content)              | Author  |
+| GET    | `/author`             | Get news posted by the currently logged-in author    | Author  |
+| GET    | `/:id`                | Get a single news article by its unique `newsId`     | Public  |
+| GET    | `/tags/:tag`          | Get all published news filtered by a specific tag    | Public  |
+| GET    | `/author/:authorId`   | Get all published news by a public author's ID       | Public  |
 
-> 📌 **Upload fields must include:** `imageFile`, `contentFile`
+> 📌 **News Upload Notes**:
+> - Required fields: `title`, `tags[]`, `imageFile`, `contentFile`
+> - Optional: `isDraft` (boolean)
+> - Auto-generated fields: `newsId`, `createdAt`, `updatedAt`
+
+---
+
+## 📌 Other Notes
+
+- All protected routes require a `Bearer <token>` in the Authorization header.
+- File uploads must use `multipart/form-data` for both `imageFile` and `contentFile`.
+- `tags[]` should be sent as an array of strings.
+
+
 
 
 ## How to Run Locally
