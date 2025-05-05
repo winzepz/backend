@@ -44,6 +44,10 @@ const step2ValidationSchema = Joi.object({
   newsletterUpdates: Joi.boolean().optional().default(false).messages({
     'boolean.base': 'Newsletter Updates must be a boolean value',
   }),
+  termsAgreed: Joi.boolean().valid(true).required().messages({
+    'any.only': 'You must agree to the terms and conditions',
+    'any.required': 'You must agree to the terms and conditions',
+  }),
 });
 
 // Step 3 Validation
@@ -56,10 +60,6 @@ const step3ValidationSchema = Joi.object({
   experienceLevel: Joi.string().valid('beginner', 'intermediate', 'experienced').required().messages({
     'any.only': 'Experience level must be one of: beginner, intermediate, experienced',
     'any.required': 'Experience level is required',
-  }),
-  termsAgreed: Joi.boolean().valid(true).required().messages({
-    'any.only': 'You must agree to the terms and conditions',
-    'any.required': 'You must agree to the terms and conditions',
   }),
 });
 
@@ -138,9 +138,9 @@ const finalizeRegistration = async (req, res) => {
       bio: step2Data.bio,
       portfolioURL: step2Data.portfolioURL,
       newsletterUpdates: step2Data.newsletterUpdates,
+      termsAgreed: step2Data.termsAgreed,
       preferences: step3Data.preferences,
       experienceLevel: step3Data.experienceLevel,
-      termsAgreed: step3Data.termsAgreed,
       role: "author", 
     });
 
