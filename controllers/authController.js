@@ -2,6 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const asyncHandler = require('express-async-handler');
+const generateUniqueUserId = require('../utils/generateUserId');
 
 // Step 1 Validation
 const step1ValidationSchema = Joi.object({
@@ -126,9 +127,11 @@ const finalizeRegistration = async (req, res) => {
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
-
+    const userId = await generateUniqueUserId();
+    
     // Create the user
     const user = new User({
+      userId,
       fullName: step1Data.fullname,
       email: step1Data.email,
       password: step1Data.password, 

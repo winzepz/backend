@@ -23,7 +23,7 @@ router.post("/login", loginUser);
 // Destroy session route
 router.get("/register/destroy-session", destroyRegistrationSession);
 
-// Optional session check route
+// session check route
 router.get("/session", (req, res) => {
   if (req.session.step1Data || req.session.step2Data || req.session.step3Data) {
     return res.json({
@@ -44,7 +44,7 @@ router.post('/logout', protect, (req, res) => {
   res.json({ message: 'Logged out successfully' });
 });
 
-// Just a test route
+//test
 router.get("/meowmeow", (req, res) => {
   res.json({ message: "Meow" });
 });
