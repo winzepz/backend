@@ -1,25 +1,20 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Protect middleware for general authentication
 const protect = async (req, res, next) => {
   let token;
 
-  
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
-      // Get the token from the Authorization header
+      
       token = req.headers.authorization.split(' ')[1];
 
-      // Verify the token using the secret key
+     
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Find the user based on the decoded token's ID
       req.user = await User.findById(decoded.id);
 
-      // Proceed to the next middleware or route handler
+      
       next();
     } catch (err) {
       console.error(err);
@@ -30,10 +25,18 @@ const protect = async (req, res, next) => {
     }
   }
 
-  // If no token is provided
   if (!token) {
     return res.status(401).json({ message: 'Not authorized, no token' });
   }
 };
 
-module.exports = { protect };
+// Check if the user is an admin
+const isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    return res.status(403).json({ message: 'Access denied. Admins only.' });
+  }
+};
+
+module.exports = { protect, isAdmin };

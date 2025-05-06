@@ -6,7 +6,8 @@ const {
   getAuthorNews,
   getNewsById,
   getNewsByTags,
-  getNewsByAuthorId
+  getNewsByAuthorId,
+  editNewsByAuthor
 } = require("../controllers/newsController");
 
 const router = express.Router();
@@ -33,5 +34,11 @@ router.get("/tags/:tag", getNewsByTags);
 
 // Public route to get news by authorId (testing doneee)
 router.get("/author/:authorId", getNewsByAuthorId);
+
+// Edit News By Author (Testing Done, Created Date Bug(Minor), Version Bug(Minor))
+router.put("/:newsId/edit", protect, upload.fields([
+  { name: 'imageFile', maxCount: 1 },
+  { name: 'contentFile', maxCount: 1 }
+]), editNewsByAuthor);
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const News = require("../models/News");
 const User = require("../models/User");
 const generateUniqueNewsId = require('../utils/generateUniqueNewsId');
+const cloudinary = require('../config/cloudinary');
 
 // CREATE NEWS
 exports.createNews = async (req, res) => {
@@ -91,7 +92,7 @@ exports.getNewsByAuthorId = async (req, res) => {
 // GET NEWS BY ID
 exports.getNewsById = async (req, res) => {
   try {
-    const news = await News.findOne({ newsId: req.params.id });  // Use newsId instead of MongoDB's ObjectId
+    const news = await News.findOne({ newsId: req.params.id });  
 
     if (!news) {
       return res.status(404).json({ message: "News not found." });
@@ -126,5 +127,67 @@ exports.getNewsByTags = async (req, res) => {
   }
 };
 
+// Edit News by Author
+exports.editNewsByAuthor = async (req, res) => {
+  try {
+    const { title, tags, isDraft } = req.body;
+    const { newsId } = req.params;
+    const authorId = req.user.userId;
 
+    // Find the news by custom ID
+    const news = await News.findOne({ newsId });
 
+    if (!news) {
+      return res.status(404).json({ success: false, message: "News not found" });
+    }
+
+    if (news.authorId !== authorId) {
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+    }
+
+    // Start with existing URLs
+    let imageURL = news.image;
+    let contentFileURL = news.content;
+
+    // Upload new image if provided
+    if (req.files?.imageFile) {
+      const imageFile = req.files.imageFile[0];
+      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        folder: "newsportal_uploads",
+        resource_type: "image",
+        public_id: `${Date.now()}-${imageFile.originalname}`
+      });
+      imageURL = imageUpload.secure_url;
+    }
+
+    // Upload new PDF if provided
+    if (req.files?.contentFile) {
+      const contentFile = req.files.contentFile[0];
+      const pdfUpload = await cloudinary.uploader.upload(contentFile.path, {
+        folder: "newsportal_uploads",
+        resource_type: "raw",
+        public_id: `${Date.now()}-${contentFile.originalname}`
+      });
+      contentFileURL = pdfUpload.secure_url;
+    }
+
+    // Update the fields
+    news.title = title;
+    news.tags = tags;
+    news.isDraft = isDraft;
+    news.status = "pending";
+    news.image = imageURL;
+    news.content = contentFileURL;
+
+    await news.save();
+
+    res.status(200).json({
+      success: true,
+      message: "News updated and sent for re-approval.",
+      data: news,
+    });
+  } catch (err) {
+    console.error("Error updating news:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

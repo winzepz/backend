@@ -1,0 +1,11 @@
+const express = require('express');
+const router = express.Router();
+
+const { protect, isAdmin } = require('../middlewares/authMiddleware');
+const adminController = require('../controllers/adminController');
+
+router.get('/pending-news', protect, isAdmin, adminController.getPendingNews);
+router.put('/approve/:newsId', protect, isAdmin, adminController.approveNews);
+router.put('/reject/:newsId', protect, isAdmin, adminController.rejectNews);
+
+module.exports = router;

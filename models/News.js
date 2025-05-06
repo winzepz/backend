@@ -11,7 +11,7 @@ const newsSchema = new mongoose.Schema({
   authorName: { type: String, required: true },
   status: {
     type: String,
-    enum: ["pending", "approved", "rejected"],
+    enum: ["pending", "published", "rejected"],
     default: "pending"
   },
   isDraft: { type: Boolean, default: false },
