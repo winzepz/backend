@@ -54,3 +54,74 @@ exports.rejectNews = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+
+// GET VERIFIED AUTHORS
+exports.getVerifiedAuthors = async (req, res) => {
+  try {
+    const verifiedAuthors = await User.find({
+      role: 'author',
+      isVerified: true
+    })
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    if (verifiedAuthors.length === 0) {
+      return res.status(404).json({ message: 'No verified authors found.' });
+    }
+
+    res.status(200).json(verifiedAuthors);
+  } catch (err) {
+    console.error('Error fetching verified authors:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+// GET NOT VERIFIED AUTHORS
+exports.getUnverifiedAuthors = async (req, res) => {
+  try {
+    const unverifiedAuthors = await User.find({
+      role: 'author',
+      isVerified: false
+    })
+      .select('-password')
+      .sort({ createdAt: -1 });
+
+    if (unverifiedAuthors.length === 0) {
+      return res.status(404).json({ message: 'No unverified authors found.' });
+    }
+
+    res.status(200).json(unverifiedAuthors);
+  } catch (err) {
+    console.error('Error fetching unverified authors:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+// APPROVE AUTHOR (SET isVerified = true)
+exports.approveAuthor = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const user = await User.findOne({ userId, role: 'author' });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Author not found' });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ message: 'Author is already verified' });
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    res.status(200).json({ message: 'Author verified successfully', user });
+  } catch (err) {
+    console.error('Error approving author:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

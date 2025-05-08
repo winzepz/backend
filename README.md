@@ -128,42 +128,47 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 
 ## 📰 News Routes (/api/news)
 
-| Method | Endpoint               | Description                                          | Access  |
-|--------|------------------------|------------------------------------------------------|---------|
-| POST   | /                      | Upload a news article (image + content)              | Author  |
-| GET    | /author                | Get news posted by the currently logged-in author    | Author  |
-| GET    | /:id                   | Get a single news article by its unique newsId       | Public  |
-| GET    | /tags/:tag             | Get all published news filtered by a specific tag    | Public  |
-| GET    | /author/:authorId      | Get all published news by a public author's ID       | Public  |
+| Method | Endpoint                    | Description                                                      | Access  |
+|--------|-----------------------------|------------------------------------------------------------------|---------|
+| POST   | /                           | Upload a news article (image + content)                          | Author  |
+| PUT    | /:newsId/edit               | Edit an existing news article by the logged-in author            | Author  |
+| GET    | /author                     | Get news posted by the currently logged-in author                | Author  |
+| GET    | /:id                        | Get a single news article by its unique newsId                   | Public  |
+| GET    | /tags/:tag                  | Get all published news filtered by a specific tag                | Public  |
+| GET    | /author/:authorId           | Get all published news by a public author's ID                   | Public  |
+| GET    | /public/news                | Get all published news articles                                  | Public  |
 
-> 📌 **News Upload Notes**:
-> - Required fields: title, tags[], imageFile, contentFile
-> - Optional: isDraft (boolean)
-> - Auto-generated fields: newsId, createdAt, updatedAt
+> 📌 **News Upload/Edit Notes**:
+> - Required fields: `title`, `tags[]`, `imageFile`, `contentFile`  
+> - Optional: `isDraft` (boolean)  
+> - Auto-generated fields: `newsId`, `createdAt`, `updatedAt`  
+> - Uploads must be sent as `multipart/form-data`
 
 ---
 
 ## 🛠️ Admin Routes (/api/admin)
 
-| Method | Endpoint                | Description                                               | Access   |
-|--------|-------------------------|-----------------------------------------------------------|----------|
-| GET    | /pending-news           | Get all news in "pending" state awaiting approval         | Admin    |
-| PUT    | /approve/:newsId        | Approve a news article and change its state to "published"| Admin    |
-| PUT    | /reject/:newsId         | Reject a news article and change its state to "rejected"  | Admin    |
+| Method | Endpoint                           | Description                                                        | Access   |
+|--------|------------------------------------|--------------------------------------------------------------------|----------|
+| GET    | /pending-news                      | Get all news in "pending" state awaiting approval                  | Admin    |
+| PUT    | /approve/:newsId                   | Approve a news article and change its state to "published"         | Admin    |
+| PUT    | /reject/:newsId                    | Reject a news article and change its state to "rejected"           | Admin    |
+| GET    | /authors/verified                  | Get all verified authors                                           | Public   |
+| GET    | /authors/unverified                | Get all unverified authors                                         | Public   |
+| PUT    | /authors/approve/:userId           | Approve an author's verification status                            | Admin    |
 
 > 📌 **Admin Notes**:
-> - All admin routes require a Bearer <token> in the Authorization header.
-> - Only users with "Admin" role can access these routes.
-> - News articles can be approved or rejected, which will update their status accordingly.
+> - All admin routes (except GET on authors) require a Bearer `<token>` and "Admin" role  
+> - News status transitions: pending → published or rejected  
+> - Verified authors can be approved via a dedicated endpoint  
 
 ---
 
-## 📌 Other Notes
+## 📌 General Notes
 
-- All protected routes require a Bearer <token> in the Authorization header.
-- File uploads must use multipart/form-data for both imageFile and contentFile.
-- tags[] should be sent as an array of strings.
-
+- All protected routes require a Bearer `<token>` in the Authorization header.  
+- File uploads (`imageFile` and `contentFile`) must use `multipart/form-data`.  
+- `tags[]` must be passed as an array of strings. 
 
 
 ## How to Run Locally
