@@ -6,8 +6,10 @@ const {
   getAuthorNews,
   getNewsById,
   getNewsByTags,
+  getAllPublishedNews,
   getNewsByAuthorId,
   editNewsByAuthor
+
 } = require("../controllers/newsController");
 
 const router = express.Router();
@@ -34,6 +36,9 @@ router.get("/tags/:tag", getNewsByTags);
 
 // Public route to get news by authorId (testing doneee)
 router.get("/author/:authorId", getNewsByAuthorId);
+
+// Public Route: Get All Published News
+router.get("/public/news", getAllPublishedNews);
 
 // Edit News By Author (Testing Done, Created Date Bug(Minor), Version Bug(Minor))
 router.put("/:newsId/edit", protect, upload.fields([

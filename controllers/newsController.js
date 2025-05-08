@@ -127,6 +127,26 @@ exports.getNewsByTags = async (req, res) => {
   }
 };
 
+// GET ALL PUBLISHED NEWS (Public Access)
+exports.getAllPublishedNews = async (req, res) => {
+  try {
+    const newsList = await News.find({
+      status: "published",
+      isDraft: false
+    }).sort({ createdAt: -1 });
+
+    if (newsList.length === 0) {
+      return res.status(404).json({ message: "No published news available." });
+    }
+
+    res.status(200).json(newsList);
+  } catch (err) {
+    console.error("Error fetching all published news:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+
 // Edit News by Author
 exports.editNewsByAuthor = async (req, res) => {
   try {
