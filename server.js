@@ -7,6 +7,7 @@ const newsRoutes = require("./routes/newsRoutes");
 const adminRoutes = require('./routes/adminRoutes');
 const connectDB = require("./config/db");
 const errorHandler = require("./middlewares/errorHandler");
+const devRoutes = require('./routes/devRoutes');//only for development phase
 
 dotenv.config();
 connectDB();
@@ -38,6 +39,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/news", newsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/dev', devRoutes); //only for development phase
 
 
 app.use(errorHandler);
