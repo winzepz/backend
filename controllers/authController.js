@@ -176,6 +176,13 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid Password" });
     }
 
+    // check author verification status
+    if (user.role === "author" && !user.isVerified) {
+      return res.status(403).json({
+        message: "Wait for author approval. Your account is not yet verified.",
+      });
+    }
+
     const token = jwt.sign(
       { id: user._id, email: user.email },
       process.env.JWT_SECRET,

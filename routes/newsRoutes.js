@@ -1,6 +1,7 @@
 const express = require("express");
 const { protect } = require("../middlewares/authMiddleware");
 const upload = require("../middlewares/cloudinaryUploader");
+const isVerified = require("../middlewares/isVerified");
 const {
   createNews,
   getAuthorNews,
@@ -17,7 +18,7 @@ const router = express.Router();
 // CREATE NEWS
 router.post(
   "/",
-  protect,
+  protect,isVerified,
   upload.fields([
     { name: "contentFile", maxCount: 1 },
     { name: "imageFile", maxCount: 1 },
