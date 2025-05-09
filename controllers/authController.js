@@ -291,6 +291,40 @@ const deleteProfile = async (req, res) => {
   }
 };
 
+// Check author verification status by email
+
+const checkAuthorVerificationStatus = async (req, res) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return res.status(400).json({ message: "Email query parameter is required." });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.role !== "author") {
+      return res.status(403).json({ message: "This endpoint is for authors only." });
+    }
+
+    return res.status(200).json({
+      email: user.email,
+      isVerified: user.isVerified,
+      message: user.isVerified
+        ? "Author is verified."
+        : "Author is not verified yet.",
+    });
+  } catch (error) {
+    console.error("Error checking verification status:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+
 
 module.exports = {
   registerStep1,
@@ -301,5 +335,6 @@ module.exports = {
   destroyRegistrationSession,
   getUserProfile,
   updateUserProfile,
-  deleteProfile
+  deleteProfile,
+  checkAuthorVerificationStatus
 };

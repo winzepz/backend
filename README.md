@@ -112,17 +112,19 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 
 ## 🔐 Auth Routes (/api/auth)
 
-| Method | Endpoint                    | Description                             | Access    |
-|--------|-----------------------------|-----------------------------------------|-----------|
-| POST   | /register/step1             | Start registration (email, password)    | Public    |
-| POST   | /register/step2             | Add bio and newsletter opt-in           | Public    |
-| POST   | /register/step3             | Add preferences and experience level    | Public    |
-| POST   | /register/finalize          | Final step - save user                  | Public    |
-| POST   | /login                      | Login with email + password             | Public    |
-| GET    | /profile                    | Get logged-in user's profile            | Protected |
-| PUT    | /profile                    | Update logged-in user's profile         | Protected |
-| GET    | /register/destroy-session   | Destroy incomplete registration session | Public    |
-| GET    | /session                    | Check ongoing registration session      | Public    |
+| Method | Endpoint                    | Description                                                  | Access    |
+|--------|-----------------------------|--------------------------------------------------------------|-----------|
+| POST   | /register/step1             | Start registration (email, password)                         | Public    |
+| POST   | /register/step2             | Add bio and newsletter opt-in                                | Public    |
+| POST   | /register/step3             | Add preferences and experience level                         | Public    |
+| POST   | /register/finalize          | Final step - save user                                       | Public    |
+| GET    | /register/destroy-session   | Destroy incomplete registration session                      | Public    |
+| GET    | /session                    | Check ongoing registration session                           | Public    |
+| POST   | /login                      | Login with email + password                                  | Public    |
+| GET    | /verify-status              | Check author's verification status using email query param   | Public    |
+| DELETE | /profile                    | Delete logged-in user's account (requires password)          | Protected |
+| GET    | /profile                    | Get logged-in user's profile                                 | Protected |
+| PUT    | /profile                    | Update logged-in user's profile                              | Protected |
 
 ---
 
@@ -153,8 +155,8 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 | GET    | /pending-news                      | Get all news in "pending" state awaiting approval                  | Admin    |
 | PUT    | /approve/:newsId                   | Approve a news article and change its state to "published"         | Admin    |
 | PUT    | /reject/:newsId                    | Reject a news article and change its state to "rejected"           | Admin    |
-| GET    | /authors/verified                  | Get all verified authors                                           | Public   |
-| GET    | /authors/unverified                | Get all unverified authors                                         | Public   |
+| GET    | /authors/verified                  | Get all verified authors                                           | Admin    |
+| GET    | /authors/unverified                | Get all unverified authors                                         | Admin    |
 | PUT    | /authors/approve/:userId           | Approve an author's verification status                            | Admin    |
 
 > 📌 **Admin Notes**:
@@ -168,7 +170,8 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 
 - All protected routes require a Bearer `<token>` in the Authorization header.  
 - File uploads (`imageFile` and `contentFile`) must use `multipart/form-data`.  
-- `tags[]` must be passed as an array of strings. 
+- `tags[]` must be passed as an array of strings.  
+- Authors must be verified before login access is granted.
 
 
 ## How to Run Locally
