@@ -10,4 +10,5 @@ router.put('/reject/:newsId', protect, isAdmin, adminController.rejectNews);
 router.get('/authors/verified', protect, isAdmin, adminController.getVerifiedAuthors);
 router.get('/authors/unverified', protect, isAdmin, adminController.getUnverifiedAuthors);
 router.put('/authors/approve/:userId', protect, isAdmin, adminController.approveAuthor);
+router.delete('/author/:userId', protect, isAdmin, adminController.deleteUser);
 module.exports = router;
