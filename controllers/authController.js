@@ -153,8 +153,10 @@ const finalizeRegistration = async (req, res) => {
     );
 
     // Clear session after final registration
-    req.session.destroy();
-    res.status(201).json({ message: "User registered successfully", token });
+    return res.status(201).json({
+      message: "Registration complete. Please wait for author approval by admin.",
+      status: "pending_verification",
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error registering user", error });
@@ -262,6 +264,34 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
+//Delete author (Passowrd required)
+const deleteProfile = async (req, res) => {
+  const { password } = req.body;
+
+  if (!password) {
+    return res.status(400).json({ message: "Password is required for account deletion." });
+  }
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Incorrect password." });
+    }
+
+    await User.findByIdAndDelete(req.user.id);
+    res.status(200).json({ message: "Account deleted successfully." });
+  } catch (error) {
+    console.error("Account deletion error:", error);
+    res.status(500).json({ message: "Server error during account deletion." });
+  }
+};
+
+
 module.exports = {
   registerStep1,
   registerStep2,
@@ -270,5 +300,6 @@ module.exports = {
   loginUser,
   destroyRegistrationSession,
   getUserProfile,
-  updateUserProfile
+  updateUserProfile,
+  deleteProfile
 };

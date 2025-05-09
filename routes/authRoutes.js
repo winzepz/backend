@@ -8,6 +8,7 @@ const {
   loginUser,
   getUserProfile,
   updateUserProfile,
+  deleteProfile,
   destroyRegistrationSession,
 } = require("../controllers/authController");
 
@@ -39,6 +40,8 @@ router.get("/session", (req, res) => {
 
 router.get('/profile', protect, getUserProfile); 
 router.put('/profile', protect, updateUserProfile);
+router.delete("/profile", protect, deleteProfile);
+
 
 router.post('/logout', protect, (req, res) => {
   res.json({ message: 'Logged out successfully' });
