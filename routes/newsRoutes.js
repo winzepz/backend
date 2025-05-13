@@ -12,7 +12,8 @@ const {
   editNewsByAuthor,
   getTopAuthors,
   getTopCategories,
-  getOwnDraftNews
+  getOwnDraftNews,
+  deleteOwnNews
 
 
 } = require("../controllers/newsController");
@@ -31,6 +32,8 @@ router.post(
 );
 
 router.get('/drafts',protect, getOwnDraftNews);
+
+router.delete('/delete/:newsId', protect, deleteOwnNews);
 
 // GET ALL NEWS BY AUTHOR (Logged-in user's news) (Testing Done)
 router.get("/author", protect, getAuthorNews);

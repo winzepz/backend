@@ -180,3 +180,43 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// GET Deleted Users (Admin only)
+exports.getDeletedUsers = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Access denied. Admins only." });
+    }
+
+    const deletedUsers = await DeletedUser.find().sort({ deletedAt: -1 });
+
+    if (deletedUsers.length === 0) {
+      return res.status(404).json({ message: "No deleted users found." });
+    }
+
+    res.status(200).json(deletedUsers);
+  } catch (err) {
+    console.error("Error fetching deleted users:", err);
+    res.status(500).json({ message: "Server error." });
+  }
+};
+
+// GET Deleted News (Admin only)
+exports.getDeletedNews = async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Access denied. Admins only." });
+    }
+
+    const deletedNews = await DeletedNews.find().sort({ deletedAt: -1 });
+
+    if (deletedNews.length === 0) {
+      return res.status(404).json({ message: "No deleted news found." });
+    }
+
+    res.status(200).json(deletedNews);
+  } catch (err) {
+    console.error("Error fetching deleted news:", err);
+    res.status(500).json({ message: "Server error." });
+  }
+};

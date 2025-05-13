@@ -28,4 +28,10 @@ router.delete('/author/:userId', protect, isAdmin, adminController.deleteUser);
 // Route to delete news (admin only)
 router.delete('/news/:newsId', protect, isAdmin, adminController.deleteNews);
 
+// GET deleted users (Admin only)
+router.get('/deleted-users', protect, isAdmin, adminController.getDeletedUsers);
+
+// GET deleted news (Admin only)
+router.get('/deleted-news', protect, isAdmin, adminController.getDeletedNews);
+
 module.exports = router;

@@ -189,10 +189,11 @@ Fetches the **top 10 authors** based on the number of **published** news article
 | GET    | /session                    | Check ongoing registration session                           | Public    |
 | POST   | /login                      | Login with email + password                                  | Public    |
 | GET    | /verify-status              | Check author's verification status using email query param   | Public    |
+| DELETE | /delete/:newsId (New)       | Delete your own news article (moves it to DeletedNews)       | Protected |
 | DELETE | /profile                    | Delete logged-in user's account (requires password)          | Protected |
 | GET    | /profile                    | Get logged-in user's profile                                 | Protected |
 | PUT    | /profile                    | Update logged-in user's profile                              | Protected |
-| GET    | /drafts                     | Get all draft news articles of the currently logged-in author| Protected |
+| GET    | /drafts (New)               | Get all draft news articles of the currently logged-in author| Protected |
 
 
 ---
@@ -208,8 +209,8 @@ Fetches the **top 10 authors** based on the number of **published** news article
 | GET    | /tags/:tag                  | Get all published news filtered by a specific tag                | Public  |
 | GET    | /author/:authorId           | Get all published news by a public author's ID                   | Public  |
 | GET    | /public/news                | Get all published news articles                                  | Public  |
-| GET    | /top-authors                | Get the top 10 authors based on the number of published news     | Public  |
-| GET    | /top-categories             | Get the top 10 categories based on the number of published news  | Public  |
+| GET    | /top-authors (New)          | Get the top 10 authors based on the number of published news     | Public  |
+| GET    | /top-categories (New)       | Get the top 10 categories based on the number of published news  | Public  |
 
 > 📌 **News Upload/Edit Notes**:
 > - Required fields: `title`, `tags[]`, `imageFile`, `contentFile`  
@@ -229,8 +230,10 @@ Fetches the **top 10 authors** based on the number of **published** news article
 | GET    | /authors/verified                   | Get all verified authors                                           | Admin    |
 | GET    | /authors/unverified                 | Get all unverified authors                                         | Admin    |
 | PUT    | /authors/approve/:userId            | Approve an author's verification status                            | Admin    |
-| DELETE | /news/:newsId                       | Delete a news article (moves it to `DeletedNews` collection)       | Admin    |
-| DELETE | /author/:userId                       | Delete a user (moves it to `DeletedUser` collection)               | Admin    |
+| DELETE | /news/:newsId (New)                 | Delete a news article (moves it to `DeletedNews` collection)       | Admin    |
+| DELETE | /author/:userId (New)               | Delete a user (moves it to `DeletedUser` collection)               | Admin    |
+| GET    | /deleted-users (New)                | Get all deleted users                                              | Admin    |
+| GET    | /deleted-news (New)                 | Get all deleted news articles                                      | Admin    |
 
 > 📌 **Admin Notes**:
 > - All admin routes (except GET on authors) require a Bearer `<token>` and "Admin" role  

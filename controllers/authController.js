@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const asyncHandler = require('express-async-handler');
 const generateUniqueUserId = require('../utils/generateUserId');
+const DeletedUser = require('../models/DeletedUser');
 
 // Step 1 Validation
 const step1ValidationSchema = Joi.object({
@@ -263,6 +264,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 });
 
 //Delete author (Passowrd required)
+
+
 const deleteProfile = async (req, res) => {
   const { password } = req.body;
 
@@ -281,13 +284,23 @@ const deleteProfile = async (req, res) => {
       return res.status(401).json({ message: "Incorrect password." });
     }
 
+    const deletedUser = new DeletedUser({
+      ...user.toObject(),
+      deletedAt: new Date(),
+    });
+    await deletedUser.save();
+
     await User.findByIdAndDelete(req.user.id);
+
     res.status(200).json({ message: "Account deleted successfully." });
   } catch (error) {
     console.error("Account deletion error:", error);
     res.status(500).json({ message: "Server error during account deletion." });
   }
 };
+
+
+
 
 // Check author verification status by email
 

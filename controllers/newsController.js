@@ -311,3 +311,33 @@ exports.getOwnDraftNews = async (req, res) => {
   }
 };
 
+// DELETE OWN NEWS
+exports.deleteOwnNews = async (req, res) => {
+  try {
+    const { newsId } = req.params;
+    const authorId = req.user.userId
+
+    const news = await News.findOne({ newsId: newsId });
+
+    if (!news) {
+      return res.status(404).json({ message: 'News not found.' });
+    }
+
+    if (news.authorId.toString() !== authorId.toString()) {
+      return res.status(403).json({ message: 'You are not authorized to delete this article.' });
+    }
+
+    const deletedNews = new DeletedNews({
+      ...news.toObject(),
+      deletedAt: new Date(),
+    });
+    await deletedNews.save();
+
+    await News.deleteOne({ newsId: newsId });
+
+    res.status(200).json({ message: 'News deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting own news:', error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+};
