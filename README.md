@@ -108,9 +108,76 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 - **dotenv** for environment variables.
 
 ---
-# 📬 API Documentation
+# API Documentation
 
-## 🔐 Auth Routes (/api/auth)
+
+# Endpoint: `GET /api/news/top-authors`
+
+---
+
+## 🔍 Description
+Fetches the **top 10 authors** based on the number of **published** news articles (excluding drafts).
+
+---
+
+## Success Response
+
+### HTTP Status: `200 OK`
+
+### Response Format:
+```json
+[
+  {
+    "authorId": "661f2cb7200d47f378c2bd1f",
+    "authorName": "Darwin Paudel",
+    "totalPublishedNews": 12
+  },
+  {
+    "authorId": "662000bc84f154e96f87f941",
+    "authorName": "Alisha Tamang",
+    "totalPublishedNews": 9
+  }
+  // ... up to 10 authors
+]
+```
+
+## Error Responses
+
+### 1. No Published News Found
+- **HTTP Status:** `404 Not Found`
+- **When:** No authors have any published and non-draft news.
+- **Response:**
+```json
+{
+  "message": "No published news found."
+}
+```
+
+
+### 2. Internal Server Error
+
+- **HTTP Status:** `500 Internal Server Error`
+- **When:** Something unexpected fails on the server (e.g., database issue).
+- **Response:**
+```json
+{
+  "error": "Internal server error."
+}
+```
+
+
+## Testing Notes for Frontend
+
+- **On `200 OK`**, display the top authors with their names and number of published news articles.
+
+- **On `404`**, show a user-friendly message like:  
+  > "No top authors available yet."
+
+- **On `500`**, show a fallback message like:  
+  > "Something went wrong. Please try again later."
+
+
+## 🔐 Auth Routes (`/api/auth`)
 
 | Method | Endpoint                    | Description                                                  | Access    |
 |--------|-----------------------------|--------------------------------------------------------------|-----------|
@@ -125,10 +192,12 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 | DELETE | /profile                    | Delete logged-in user's account (requires password)          | Protected |
 | GET    | /profile                    | Get logged-in user's profile                                 | Protected |
 | PUT    | /profile                    | Update logged-in user's profile                              | Protected |
+| GET    | /drafts                     | Get all draft news articles of the currently logged-in author| Protected |
+
 
 ---
 
-## 📰 News Routes (/api/news)
+## 📰 News Routes (`/api/news`)
 
 | Method | Endpoint                    | Description                                                      | Access  |
 |--------|-----------------------------|------------------------------------------------------------------|---------|
@@ -139,6 +208,8 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 | GET    | /tags/:tag                  | Get all published news filtered by a specific tag                | Public  |
 | GET    | /author/:authorId           | Get all published news by a public author's ID                   | Public  |
 | GET    | /public/news                | Get all published news articles                                  | Public  |
+| GET    | /top-authors                | Get the top 10 authors based on the number of published news     | Public  |
+| GET    | /top-categories             | Get the top 10 categories based on the number of published news  | Public  |
 
 > 📌 **News Upload/Edit Notes**:
 > - Required fields: `title`, `tags[]`, `imageFile`, `contentFile`  
@@ -148,16 +219,18 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 
 ---
 
-## 🛠️ Admin Routes (/api/admin)
+## 🛠️ Admin Routes (`/api/admin`)
 
-| Method | Endpoint                           | Description                                                        | Access   |
-|--------|------------------------------------|--------------------------------------------------------------------|----------|
-| GET    | /pending-news                      | Get all news in "pending" state awaiting approval                  | Admin    |
-| PUT    | /approve/:newsId                   | Approve a news article and change its state to "published"         | Admin    |
-| PUT    | /reject/:newsId                    | Reject a news article and change its state to "rejected"           | Admin    |
-| GET    | /authors/verified                  | Get all verified authors                                           | Admin    |
-| GET    | /authors/unverified                | Get all unverified authors                                         | Admin    |
-| PUT    | /authors/approve/:userId           | Approve an author's verification status                            | Admin    |
+| Method | Endpoint                            | Description                                                        | Access   |
+|--------|-------------------------------------|--------------------------------------------------------------------|----------|
+| GET    | /pending-news                       | Get all news in "pending" state awaiting approval                  | Admin    |
+| PUT    | /approve/:newsId                    | Approve a news article and change its state to "published"         | Admin    |
+| PUT    | /reject/:newsId                     | Reject a news article and change its state to "rejected"           | Admin    |
+| GET    | /authors/verified                   | Get all verified authors                                           | Admin    |
+| GET    | /authors/unverified                 | Get all unverified authors                                         | Admin    |
+| PUT    | /authors/approve/:userId            | Approve an author's verification status                            | Admin    |
+| DELETE | /news/:newsId                       | Delete a news article (moves it to `DeletedNews` collection)       | Admin    |
+| DELETE | /author/:userId                       | Delete a user (moves it to `DeletedUser` collection)               | Admin    |
 
 > 📌 **Admin Notes**:
 > - All admin routes (except GET on authors) require a Bearer `<token>` and "Admin" role  
@@ -172,6 +245,7 @@ All API responses return proper HTTP status codes. Errors are handled using the 
 - File uploads (`imageFile` and `contentFile`) must use `multipart/form-data`.  
 - `tags[]` must be passed as an array of strings.  
 - Authors must be verified before login access is granted.
+
 
 
 ## How to Run Locally

@@ -1,5 +1,7 @@
 const News = require("../models/News");
 const User = require("../models/User");
+const DeletedNews = require('../models/DeletedNews');
+const DeletedUser = require('../models/DeletedUser');
 const generateUniqueNewsId = require('../utils/generateUniqueNewsId');
 const cloudinary = require('../config/cloudinary');
 
@@ -211,3 +213,101 @@ exports.editNewsByAuthor = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+
+// GET TOP AUTHORS (Public Endpoint)
+exports.getTopAuthors = async (req, res) => {
+  try {
+    const topAuthors = await News.aggregate([
+      {
+        $match: {
+          status: "published",
+          isDraft: false
+        }
+      },
+      {
+        $group: {
+          _id: "$authorId",
+          authorName: { $first: "$authorName" },
+          totalPublishedNews: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { totalPublishedNews: -1 }
+      },
+      {
+        $limit: 10 
+      }
+    ]);
+
+    if (topAuthors.length === 0) {
+      return res.status(404).json({ message: "No published news found." });
+    }
+
+    res.status(200).json(topAuthors);
+  } catch (err) {
+    console.error("Error fetching top authors:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+//GET TOP CATEGORIES(Most used tags)
+exports.getTopCategories = async (req, res) => {
+  try {
+    const topCategories = await News.aggregate([
+      {
+        $match: {
+          status: "published",
+          isDraft: false
+        }
+      },
+      {
+        $unwind: "$tags"
+      },
+      {
+        $group: {
+          _id: "$tags",
+          totalNews: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { totalNews: -1 }
+      },
+      {
+        $limit: 10
+      }
+    ]);
+
+    if (topCategories.length === 0) {
+      return res.status(404).json({ message: "No published news found." });
+    }
+
+    res.status(200).json(topCategories);
+  } catch (err) {
+    console.error("Error fetching top categories:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+
+// GET LOGGED-IN USER'S DRAFT NEWS
+exports.getOwnDraftNews = async (req, res) => {
+  try {
+    const userId = req.user.userId || req.user._id || req.user.id;
+
+    const drafts = await News.find({
+      authorId: userId,
+      isDraft: true
+    }).sort({ createdAt: -1 });
+
+    if (drafts.length === 0) {
+      return res.status(404).json({ message: "No draft news found." });
+    }
+
+    res.status(200).json(drafts);
+  } catch (err) {
+    console.error("Error fetching user's draft news:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+};
+

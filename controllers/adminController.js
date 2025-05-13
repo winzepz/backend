@@ -1,7 +1,9 @@
 const News = require('../models/News');
 const User = require('../models/User');
+const DeletedNews = require('../models/DeletedNews');
+const DeletedUser = require('../models/DeletedUser');
 
-// GET All Pending News (testing done)
+// GET All Pending News 
 exports.getPendingNews = async (req, res) => {
   try {
     const pendingNews = await News.find({ status: 'pending' });
@@ -12,7 +14,7 @@ exports.getPendingNews = async (req, res) => {
   }
 };
 
-// APPROVE News (testing doneee)
+// APPROVE News 
 exports.approveNews = async (req, res) => {
   try {
     const { newsId } = req.params;
@@ -32,7 +34,7 @@ exports.approveNews = async (req, res) => {
   }
 };
 
-// REJECT News (Testing Done  )
+// REJECT News 
 exports.rejectNews = async (req, res) => {
   try {
     const { newsId } = req.params;
@@ -54,6 +56,7 @@ exports.rejectNews = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 // GET VERIFIED AUTHORS
@@ -101,7 +104,7 @@ exports.getUnverifiedAuthors = async (req, res) => {
 
 
 
-// APPROVE AUTHOR (SET isVerified = true)
+// APPROVE AUTHOR
 exports.approveAuthor = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -126,18 +129,50 @@ exports.approveAuthor = async (req, res) => {
   }
 };
 
+// DELETE News (Admin only)
+exports.deleteNews = async (req, res) => {
+  try {
+    const { newsId } = req.params;
+
+    const news = await News.findOne({ newsId: newsId });
+
+    if (!news) {
+      return res.status(404).json({ message: 'News not found' });
+    }
+    const deletedNews = new DeletedNews({
+      ...news.toObject(),
+      deletedAt: new Date(),
+    });
+    await deletedNews.save();
+
+    await News.deleteOne({ newsId: newsId });
+
+    res.status(200).json({ message: 'News deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting news:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 // DELETE User (Admin only)
 exports.deleteUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const user = await User.findOne({ userId });
+    const user = await User.findOne({ userId: userId });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    await User.deleteOne({ userId });
+    const deletedUser = new DeletedUser({
+      ...user.toObject(),
+      deletedAt: new Date(),
+    });
+    await deletedUser.save();
+
+    await User.deleteOne({ userId: userId });
 
     res.status(200).json({ message: 'User deleted successfully' });
   } catch (err) {
@@ -145,4 +180,3 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
-

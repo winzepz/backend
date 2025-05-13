@@ -243,19 +243,17 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   const { fullName, bio, portfolioURL, preferences, experienceLevel } = req.body;
 
   try {
-    const user = await User.findById(req.user.id); // req.user.id comes from the JWT token
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    // Update only the fields that are allowed
     if (fullName) user.fullName = fullName;
     if (bio) user.bio = bio;
     if (portfolioURL) user.portfolioURL = portfolioURL;
     if (preferences) user.preferences = preferences;
     if (experienceLevel) user.experienceLevel = experienceLevel;
 
-    await user.save();  // Save the updated user
+    await user.save();  
 
     res.status(200).json({ message: "User profile updated successfully", profile: user });
   } catch (error) {
