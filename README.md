@@ -189,7 +189,6 @@ Fetches the **top 10 authors** based on the number of **published** news article
 | GET    | /session                    | Check ongoing registration session                           | Public    |
 | POST   | /login                      | Login with email + password                                  | Public    |
 | GET    | /verify-status              | Check author's verification status using email query param   | Public    |
-| DELETE | /delete/:newsId (New)       | Delete your own news article (moves it to DeletedNews)       | Protected |
 | DELETE | /profile                    | Delete logged-in user's account (requires password)          | Protected |
 | GET    | /profile                    | Get logged-in user's profile                                 | Protected |
 | PUT    | /profile                    | Update logged-in user's profile                              | Protected |
@@ -205,6 +204,7 @@ Fetches the **top 10 authors** based on the number of **published** news article
 | POST   | /                           | Upload a news article (image + content)                          | Author  |
 | PUT    | /:newsId/edit               | Edit an existing news article by the logged-in author            | Author  |
 | GET    | /author                     | Get news posted by the currently logged-in author                | Author  |
+| DELETE | /delete/:newsId (New)       | Delete your own news article (moves it to DeletedNews)           | Author  |
 | GET    | /:id                        | Get a single news article by its unique newsId                   | Public  |
 | GET    | /tags/:tag                  | Get all published news filtered by a specific tag                | Public  |
 | GET    | /author/:authorId           | Get all published news by a public author's ID                   | Public  |
